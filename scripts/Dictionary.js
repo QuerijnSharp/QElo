@@ -1,5 +1,5 @@
-export const version = "0.1 Alpha"
-export var dictionary = [
+const version = "0.1 Alpha"
+const dictionary = [
     ["sogar", "zelfs"],
     ["demnach", "dus"],
     ["nahezu, fast", "bijna"],
