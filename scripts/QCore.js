@@ -27,12 +27,12 @@ else {
     }
 
     //#region textToAddFunctions
-    function initiate() {
+    async function initiate() {
 
         //Load scripts
-        await addScript("https://raw.githubusercontent.com/QuerijnSharp/QElo/master/scripts/Dictionary.js");
+        await addScript("https://querijnsharp.github.io/QElo/scripts/Dictionary.js");
         console.log("Loaded Dictionary");
-        await addScript("https://raw.githubusercontent.com/QuerijnSharp/QElo/master/scripts/HelperFunctions.js");
+        await addScript("https://querijnsharp.github.io/QElo/scripts/HelperFunctions.js");
         console.log("Loaded Helper funcitons");
 
         //Find all events
