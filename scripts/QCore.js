@@ -84,6 +84,69 @@ else {
 
         //Make it draggable (Thanks to the helper functions)
         dragElement(maindiv, headerdiv);
+
+        var injected = true;
+        var divs = document.getElementsByTagName('div');
+        for (var div of divs) {
+            if (/^q\d+$/gm.test(div.id)) {
+
+                var questionAndAnswers = [];
+                var question = ``;
+                var questionText = "";
+
+                for (var span of div.getElementsByTagName("span"))
+                    if (span.className == "")
+                        questionText = span.innerText;
+
+                for (var em of div.getElementsByTagName("em"))
+                    if (em.className == "")
+                        questionText = em.innerText;
+
+                for (var qtext of div.getElementsByClassName("qtext"))
+                    questionText = qtext.innerText;
+
+                var bestMatchCompare = 0;
+                var found = false;
+                for (var definition of dictionary) {
+                    if (found) break;
+                    for (var word of definition) {
+                        if (word.toLowerCase().includes(questionText)) {
+                            question = word;
+                            questionAndAnswers = definition;
+                            found = true;
+                            break;
+                        }
+                        else {
+                            var currentMatchPercent = QCompare(questionText.toLowerCase(), word.toLowerCase());
+                            if (currentMatchPercent > bestMatchCompare) {
+                                bestMatchCompare = currentMatchPercent;
+                                questionAndAnswers = definition;
+                                question = word;
+                            }
+                        }
+                    }
+                }
+
+                if (questionAndAnswers == []) break;
+
+                var answerIndex = 0;
+                var answers = questionAndAnswers.filter(s => s != question);
+                var inputs = document.getElementById(div.id).getElementsByTagName("input");
+
+                for (var questionInput of inputs) {
+                    if (questionInput.id.includes("answer")) {
+                        if (answerIndex >= answers.length)
+                            break;
+                        questionInput.value = answers[answerIndex];
+                        answerIndex++;
+                    }
+                }
+            }
+        }
+
+        console.log('Injected succesfully');
+        if (typeof script !== 'undefined')
+            document.body.removeChild(script);
     }
 
     //Secret table shh
@@ -224,67 +287,4 @@ else {
         event.stopPropagation && event.stopPropagation();
     }
     //#endregion
-
-    var injected = true;
-    var divs = document.getElementsByTagName('div');
-    for (var div of divs) {
-        if (/^q\d+$/gm.test(div.id)) {
-
-            var questionAndAnswers = [];
-            var question = ``;
-            var questionText = "";
-
-            for (var span of div.getElementsByTagName("span"))
-                if (span.className == "")
-                    questionText = span.innerText;
-
-            for (var em of div.getElementsByTagName("em"))
-                if (em.className == "")
-                    questionText = em.innerText;
-
-            for (var qtext of div.getElementsByClassName("qtext"))
-                questionText = qtext.innerText;
-
-            var bestMatchCompare = 0;
-            var found = false;
-            for (var definition of dictionary) {
-                if (found) break;
-                for (var word of definition) {
-                    if (word.toLowerCase().includes(questionText)) {
-                        question = word;
-                        questionAndAnswers = definition;
-                        found = true;
-                        break;
-                    }
-                    else {
-                        var currentMatchPercent = QCompare(questionText.toLowerCase(), word.toLowerCase());
-                        if (currentMatchPercent > bestMatchCompare) {
-                            bestMatchCompare = currentMatchPercent;
-                            questionAndAnswers = definition;
-                            question = word;
-                        }
-                    }
-                }
-            }
-
-            if (questionAndAnswers == []) break;
-
-            var answerIndex = 0;
-            var answers = questionAndAnswers.filter(s => s != question);
-            var inputs = document.getElementById(div.id).getElementsByTagName("input");
-
-            for (var questionInput of inputs) {
-                if (questionInput.id.includes("answer")) {
-                    if (answerIndex >= answers.length)
-                        break;
-                    questionInput.value = answers[answerIndex];
-                    answerIndex++;
-                }
-            }
-        }
-    }
-
-    console.log('Injected succesfully');
-    if (typeof script !== 'undefined')
-        document.body.removeChild(script);
 }
