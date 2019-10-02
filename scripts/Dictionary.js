@@ -1,5 +1,5 @@
-const version = "0.1 Alpha"
-const dictionary = [
+var version = "0.1 Alpha"
+var dictionary = [
     ["sogar", "zelfs"],
     ["demnach", "dus"],
     ["nahezu, fast", "bijna"],

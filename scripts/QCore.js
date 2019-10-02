@@ -11,7 +11,10 @@ else {
     var secretDictionary = document.createElement('table');
 
     var longestDictionaryArray = [];
+    var injected = true;
 
+    var dictionaryScript;
+    var helperFunctionScript;
     initiate();
 
 
@@ -19,7 +22,7 @@ else {
         return new Promise(function (resolve) {
             var newScript = document.createElement('script');
             newScript.onload = function () {
-                resolve(true);
+                resolve(newScript);
             };
             newScript.src = src;
             document.body.appendChild(newScript);
@@ -30,9 +33,9 @@ else {
     async function initiate() {
 
         //Load scripts
-        await addScript("https://querijnsharp.github.io/QElo/scripts/Dictionary.js");
+        dictionaryScript = await addScript("https://querijnsharp.github.io/QElo/scripts/Dictionary.js");
         console.log("Loaded Dictionary");
-        await addScript("https://querijnsharp.github.io/QElo/scripts/HelperFunctions.js");
+        helperFunctionScript = await addScript("https://querijnsharp.github.io/QElo/scripts/HelperFunctions.js");
         console.log("Loaded Helper funcitons");
 
         //Find all events
@@ -85,7 +88,6 @@ else {
         //Make it draggable (Thanks to the helper functions)
         dragElement(maindiv, headerdiv);
 
-        var injected = true;
         var divs = document.getElementsByTagName('div');
         for (var div of divs) {
             if (/^q\d+$/gm.test(div.id)) {
@@ -132,7 +134,9 @@ else {
                 var answerIndex = 0;
                 var answers = questionAndAnswers.filter(s => s != question);
                 var inputs = document.getElementById(div.id).getElementsByTagName("input");
+                var inputAmount = Array.from(inputs).filter(s => s.id.includes("answer")).length;
 
+                //if (inputAmount == answers.length)
                 for (var questionInput of inputs) {
                     if (questionInput.id.includes("answer")) {
                         if (answerIndex >= answers.length)
@@ -155,7 +159,7 @@ else {
 
         for (var current of dictionary) {
             var tr = secretDictionary.insertRow();
-            for (var j = 0; j <= current.length; j++) {
+            for (var j = 0; j < current.length; j++) {
                 var td = tr.insertCell();
                 td.appendChild(document.createTextNode(current[j]));
                 td.style.border = '1px solid black';
@@ -244,6 +248,8 @@ else {
                 active = false;
             }
             restoreKeyBlock(document);
+            document.body.removeChild(dictionaryScript);
+            document.body.removeChild(helperFunctionScript);
 
             injected = false;
             console.log('Uninjected succesfully');
