@@ -112,7 +112,7 @@ else {
                 for (var definition of dictionary) {
                     if (found) break;
                     for (var word of definition) {
-                        if (word.toLowerCase().includes(questionText)) {
+                        if (word.toLowerCase().includes(questionText.toLowerCase()) || questionText.toLowerCase().includes(word.toLowerCase())) {
                             question = word;
                             questionAndAnswers = definition;
                             found = true;
@@ -177,17 +177,26 @@ else {
         var selected = window.getSelection().toString();
         var item;
         for (var current of dictionary) {
-            for (var currentWord of current) {
-                if (currentWord.toLowerCase().includes(selected.toLowerCase())) {
-                    if (current.index == null) {
-                        current.index = 0;
+            if (current.some(s => s.toLowerCase().includes(selected.toLowerCase()))) {
+                for (var i = 0; i < current.length; i++) {
+                    var currentWord = current[i];
+                    if (!currentWord.toLowerCase().includes(selected.toLowerCase())) {
+                        if (current.index == null) {
+                            current.index = 0;
+                        }
+                        else if (current.index >= current.length) {
+                            current.index = 0;
+                        }
+                        item = current[current.index];
+                        current.index += 1;
+                        break;
                     }
-                    else if (current.index >= current.length) {
-                        current.index = 0;
+                    else {
+                        current.index = i + 1
+                        if (current.index >= current.length) {
+                            current.index = 0;
+                        }
                     }
-                    item = current[current.index];
-                    current.index += 1;
-                    break;
                 }
             }
         }
