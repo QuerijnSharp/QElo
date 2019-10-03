@@ -91,9 +91,6 @@ else {
         var divs = document.getElementsByTagName('div');
         for (var div of divs) {
             if (/^q\d+$/gm.test(div.id)) {
-
-                var questionAndAnswers = [];
-                var question = ``;
                 var questionText = "";
 
                 for (var span of div.getElementsByTagName("span"))
@@ -107,32 +104,12 @@ else {
                 for (var qtext of div.getElementsByClassName("qtext"))
                     questionText = qtext.innerText;
 
-                var bestMatchCompare = 0;
-                var found = false;
-                for (var definition of dictionary) {
-                    if (found) break;
-                    for (var word of definition) {
-                        if (word.toLowerCase().includes(questionText.toLowerCase()) || questionText.toLowerCase().includes(word.toLowerCase())) {
-                            question = word;
-                            questionAndAnswers = definition;
-                            found = true;
-                            break;
-                        }
-                        else {
-                            var currentMatchPercent = QCompare(questionText.toLowerCase(), word.toLowerCase());
-                            if (currentMatchPercent > bestMatchCompare) {
-                                bestMatchCompare = currentMatchPercent;
-                                questionAndAnswers = definition;
-                                question = word;
-                            }
-                        }
-                    }
-                }
+                var question = FindBestMatch(questionText);
 
-                if (questionAndAnswers == []) break;
+                if (question == null) break;
 
                 var answerIndex = 0;
-                var answers = questionAndAnswers.filter(s => s != question);
+                var answers = question.fullDefinition.filter(s => s != question.word);
                 var inputs = document.getElementById(div.id).getElementsByTagName("input");
                 var inputAmount = Array.from(inputs).filter(s => s.id.includes("answer")).length;
 
@@ -171,12 +148,58 @@ else {
         secretDictionary.style.display = 'block';
     }
 
+    function FindBestMatch(questionText) {
+        var results = [];
+
+        for (var definition of dictionary) {
+            for (var word of definition) {
+                if (word.toLowerCase().includes(questionText.toLowerCase()) || questionText.toLowerCase().includes(word.toLowerCase())) {
+                    results.push({
+                        'includes': true,
+                        'similarity': QCompare(questionText.toLowerCase(), word.toLowerCase()),
+                        'word': word,
+                        'fullDefinition': definition
+                    });
+                }
+                else {
+                    /*var currentMatchPercent = QCompare(questionText.toLowerCase(), word.toLowerCase());
+                    if (currentMatchPercent > bestMatchCompare) {
+                        bestMatchCompare = currentMatchPercent;
+                        questionAndAnswers = definition;
+                        question = word;
+                    }*/
+                    results.push({
+                        'includes': false,
+                        'similarity': QCompare(questionText.toLowerCase(), word.toLowerCase()),
+                        'word': word,
+                        'fullDefinition': definition
+                    });
+                }
+            }
+        }
+
+        var finalResult = null;
+        if (results.some(s => s.includes)) {
+            results = results.filter(s => s.includes == true);
+        }
+
+        var maxSimilarity = Math.max.apply(Math, results.map(function (o) { return o.similarity; }));
+        finalResult = results.find(s => s.similarity == maxSimilarity);
+        return finalResult;
+    }
     //Key stuff
     //#region keys
     function highLightEvent() {
         var selected = window.getSelection().toString();
         var item;
+        var found = false;
+        var bestMatchCompare = 0;
+        var question = ``;
+        var questionAndAnswers = [];
+        //Loop through all elements of the dictionary
         for (var current of dictionary) {
+            if (found) break;
+            //Check if the selected word is in any of the elements of current
             if (current.some(s => s.toLowerCase().includes(selected.toLowerCase()))) {
                 for (var i = 0; i < current.length; i++) {
                     var currentWord = current[i];
@@ -189,6 +212,7 @@ else {
                         }
                         item = current[current.index];
                         current.index += 1;
+                        found = true;
                         break;
                     }
                     else {
@@ -199,6 +223,20 @@ else {
                     }
                 }
             }
+            else {
+                for (var word of current) {
+                    var currentMatchPercent = QCompare(selected.toLowerCase(), word.toLowerCase());
+                    if (currentMatchPercent > bestMatchCompare) {
+                        bestMatchCompare = currentMatchPercent;
+                        questionAndAnswers = current;
+                        question = word;
+                    }
+                }
+            }
+        }
+
+        if (!item) {
+            item = questionAndAnswers.filter(s => s.toLowerCase() != question.toLowerCase())[0];
         }
 
         if (item && selected != '') {
