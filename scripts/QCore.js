@@ -88,39 +88,41 @@ else {
         //Make it draggable (Thanks to the helper functions)
         dragElement(maindiv, headerdiv);
 
-        var divs = document.getElementsByTagName('div');
+        var divs = document.getElementsByClassName("qtext");
         for (var div of divs) {
-            if (/^q\d+$/gm.test(div.id)) {
-                var questionText = "";
+            var questionText = div.children[0].textContent;
 
-                for (var span of div.getElementsByTagName("span"))
-                    if (span.className == "")
-                        questionText = span.innerText;
+            /*for (var span of div.getElementsByTagName("span"))
+                if (span.className == "")
+                    questionText = span.innerText;
 
-                for (var em of div.getElementsByTagName("em"))
-                    if (em.className == "")
-                        questionText = em.innerText;
+            for (var em of div.getElementsByTagName("em"))
+                if (em.className == "")
+                    questionText = em.innerText;
 
-                for (var qtext of div.getElementsByClassName("qtext"))
-                    questionText = qtext.innerText;
+            for (var p of div.getElementsByTagName("p"))
+                if (p.className == "")
+                    questionText = em.innerText;
 
-                var question = FindBestMatch(questionText);
+            for (var qtext of div.getElementsByClassName("qtext"))
+                questionText = qtext.innerText;*/
 
-                if (question == null) break;
+            var question = FindBestMatch(questionText);
 
-                var answerIndex = 0;
-                var answers = question.fullDefinition.filter(s => s != question.word);
-                var inputs = document.getElementById(div.id).getElementsByTagName("input");
-                var inputAmount = Array.from(inputs).filter(s => s.id.includes("answer")).length;
+            if (question == null) break;
 
-                //if (inputAmount == answers.length)
-                for (var questionInput of inputs) {
-                    if (questionInput.id.includes("answer")) {
-                        if (answerIndex >= answers.length)
-                            break;
-                        questionInput.value = answers[answerIndex];
-                        answerIndex++;
-                    }
+            var answerIndex = 0;
+            var answers = question.fullDefinition.filter(s => s != question.word);
+            var inputs = div.parentElement.getElementsByTagName("input");
+            var inputAmount = Array.from(inputs).filter(s => s.id.includes("answer") && s.type == "text").length;
+
+            //if (inputAmount == answers.length)
+            for (var questionInput of inputs) {
+                if (questionInput.id.includes("answer") && questionInput.type == "text") {
+                    if (answerIndex >= answers.length)
+                        break;
+                    questionInput.value = answers[answerIndex];
+                    answerIndex++;
                 }
             }
         }
@@ -130,7 +132,7 @@ else {
             document.body.removeChild(script);
     }
 
-    //Secret table shh
+    //Secret table
     function tableCreate() {
         secretDictionary.style.border = '1px solid black';
 
